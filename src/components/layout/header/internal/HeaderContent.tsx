@@ -4,6 +4,7 @@ import React, { memo } from 'react'
 import clsx from 'clsx'
 import {
   AnimatePresence,
+  LayoutGroup,
   m,
   useMotionTemplate,
   useMotionValue,
@@ -23,12 +24,12 @@ import { MenuPopover } from './MenuPopover'
 
 export const HeaderContent = () => {
   return (
-    <>
+    <LayoutGroup>
       <AnimatedMenu>
         <ForDesktop />
       </AnimatedMenu>
       <AccessibleMenu />
-    </>
+    </LayoutGroup>
   )
 }
 
@@ -48,7 +49,7 @@ const AccessibleMenu: Component = () => {
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed left-0 right-0 top-[3rem] z-10 flex justify-center duration-[100ms]"
+            className="pointer-events-none fixed inset-x-0 top-12 z-10 mr-[var(--removed-body-scroll-bar-size)] flex justify-center"
           >
             <ForDesktop />
           </m.div>
@@ -65,7 +66,7 @@ const AnimatedMenu: Component = ({ children }) => {
   const shouldHideNavBg = !hasMetaInfo && opacity === 0
   return (
     <m.div
-      className="duration-[100ms]"
+      className="duration-100"
       style={{
         opacity: hasMetaInfo ? opacity : 1,
         visibility: opacity === 0 && hasMetaInfo ? 'hidden' : 'visible',
@@ -81,6 +82,9 @@ const ForDesktop: Component<{
   shouldHideNavBg?: boolean
   animatedIcon?: boolean
 }> = ({ className, shouldHideNavBg, animatedIcon = true }) => {
+  const { config: headerMenuConfig } = useHeaderConfig()
+  const pathname = usePathname()
+
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
   const radius = useMotionValue(0)
@@ -94,9 +98,6 @@ const ForDesktop: Component<{
     [mouseX, mouseY, radius],
   )
 
-  const { config: headerMenuConfig } = useHeaderConfig()
-  const pathname = usePathname()
-
   const background = useMotionTemplate`radial-gradient(${radius}px circle at ${mouseX}px ${mouseY}px, var(--spotlight-color) 0%, transparent 65%)`
 
   return (
@@ -108,8 +109,8 @@ const ForDesktop: Component<{
         'rounded-full bg-gradient-to-b from-zinc-50/70 to-white/90',
         'shadow-lg shadow-zinc-800/5 ring-1 ring-zinc-900/5 backdrop-blur-md',
         'dark:from-zinc-900/70 dark:to-zinc-800/90 dark:ring-zinc-100/10',
-        'group [--spotlight-color:hsl(var(--a)_/_0.05)]',
-        'duration-200',
+        'group [--spotlight-color:oklch(var(--a)_/_0.12)]',
+        'pointer-events-auto duration-200',
         shouldHideNavBg && '!bg-none !shadow-none !ring-transparent',
         className,
       )}
@@ -135,7 +136,8 @@ const ForDesktop: Component<{
               subItemActive={section.subMenu?.[subItemActive]}
               isActive={
                 pathname === section.path ||
-                pathname.startsWith(`${section.path}/`) ||
+                (pathname.startsWith(`${section.path}/`) &&
+                  !section.exclude?.includes(pathname)) ||
                 subItemActive > -1 ||
                 false
               }
@@ -198,7 +200,7 @@ function AnimatedItem({
         href={href}
         className={clsxm(
           'relative block whitespace-nowrap px-4 py-2 transition',
-          isActive ? 'text-accent' : 'hover:text-accent-focus',
+          isActive ? 'text-accent' : 'hover:text-accent/80',
           isActive ? 'active' : '',
           className,
         )}

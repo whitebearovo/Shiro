@@ -2,7 +2,7 @@ import { createElement } from 'react'
 import { toast as Toast } from 'react-toastify'
 import type { Id, ToastOptions, TypeOptions } from 'react-toastify'
 
-import { ToastCard } from '~/components/widgets/shared/ToastCard'
+import { ToastCard } from '~/components/modules/shared/ToastCard'
 
 const baseConfig = {
   position: 'bottom-right',
@@ -33,6 +33,8 @@ interface ToastCustom {
   info(message: string, options?: ToastOptions & CustomToastOptions): Id
   warn(message: string, options?: ToastOptions & CustomToastOptions): Id
   error(message: string, options?: ToastOptions & CustomToastOptions): Id
+
+  dismiss(id: Id): void
 }
 
 // @ts-ignore
@@ -54,4 +56,8 @@ export const toast: ToastCustom = (
     message: string,
     options?: ToastOptions & CustomToastOptions,
   ) => toast(message, type as TypeOptions, options)
+})
+
+Object.assign(toast, {
+  dismiss: Toast.dismiss,
 })

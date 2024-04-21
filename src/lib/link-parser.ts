@@ -1,15 +1,23 @@
+import { getWebUrl } from '~/atoms'
+
 import { isClientSide, isDev } from './env'
 
 export const getTweetId = (url: URL) => {
   return url.pathname.split('/').pop()!
 }
 
+const GITHUB_HOST = 'github.com'
+
 export const isGithubRepoUrl = (url: URL) => {
   return (
-    url.hostname === 'github.com' &&
+    url.hostname === GITHUB_HOST &&
     url.pathname.startsWith('/') &&
     url.pathname.split('/').length === 3
   )
+}
+
+export const isGithubPrUrl = (url: URL) => {
+  return url.hostname === GITHUB_HOST && url.pathname.includes('/pull/')
 }
 
 export const isYoutubeUrl = (url: URL) => {
@@ -22,17 +30,17 @@ export const isGistUrl = (url: URL) => {
 
 export const isGithubCommitUrl = (url: URL) => {
   const [_, , , type] = url.pathname.split('/')
-  return url.hostname === 'github.com' && type === 'commit'
+  return url.hostname === GITHUB_HOST && type === 'commit'
 }
 
 export const isGithubProfileUrl = (url: URL) => {
-  return url.hostname === 'github.com' && url.pathname.split('/').length === 2
+  return url.hostname === GITHUB_HOST && url.pathname.split('/').length === 2
 }
 
 export const isGithubFilePreviewUrl = (url: URL) => {
   // https://github.com/Innei/sprightly/blob/14234594f44956e6f56f1f92952ce82db37ef4df/src/socket/handler.ts
   const [_, , , type] = url.pathname.split('/')
-  return url.hostname === 'github.com' && type === 'blob'
+  return url.hostname === GITHUB_HOST && type === 'blob'
 }
 
 export const isTweetUrl = (url: URL) => {
@@ -44,7 +52,7 @@ export const isTwitterProfileUrl = (url: URL) => {
 }
 
 export const isGithubUrl = (url: URL) => {
-  return url.hostname === 'github.com'
+  return url.hostname === GITHUB_HOST
 }
 
 export const isTwitterUrl = (url: URL) => {
@@ -66,12 +74,20 @@ export const isBilibiliUrl = (url: URL) => {
   return url.hostname.includes('bilibili.com')
 }
 
+export const isBilibiliVideoUrl = (url: URL) => {
+  return isBilibiliUrl(url) && url.pathname.startsWith('/video/BV')
+}
+
 export const isSelfArticleUrl = (url: URL) => {
   if (!isClientSide) return false
+
+  const webUrl = getWebUrl()
+  const webHost = webUrl ? new URL(webUrl).hostname : ''
+
   if (isDev && url.hostname === 'innei.in') return true
   return (
-    url.hostname === location.hostname &&
-    ['posts/', 'notes/'].some((path) => url.pathname.startsWith(path))
+    (url.hostname === location.hostname || webHost === url.hostname) &&
+    ['/posts/', '/notes/'].some((path) => url.pathname.startsWith(path))
   )
 }
 
@@ -81,6 +97,22 @@ export const isZhihuUrl = (url: URL) => {
 
 export const isZhihuProfileUrl = (url: URL) => {
   return isZhihuUrl(url) && url.pathname.startsWith('/people/')
+}
+
+export const isWikipediaUrl = (url: URL) => {
+  return url.hostname.includes('wikipedia.org')
+}
+
+export const isTMDBUrl = (url: URL) => {
+  return url.hostname.includes('themoviedb.org')
+}
+
+export const isNpmUrl = (url: URL) => {
+  return url.hostname.includes('npmjs.com')
+}
+
+export const isMozillaUrl = (url: URL) => {
+  return url.hostname.includes('mozilla.org')
 }
 
 export const parseSelfArticleUrl = (url: URL) => {
@@ -134,6 +166,33 @@ export const parseGithubTypedUrl = (url: URL) => {
 }
 
 export const parseZhihuProfileUrl = (url: URL) => {
+  const [_, type, id] = url.pathname.split('/')
+  return {
+    type,
+    id,
+  }
+}
+
+export const parseGithubPrUrl = (url: URL) => {
+  const [_, owner, repo, type, pr] = url.pathname.split('/')
+  return {
+    owner,
+    repo,
+    type,
+    pr,
+  }
+}
+
+export const parseTMDBUrl = (url: URL) => {
+  const [_, type, id] = url.pathname.split('/')
+  return {
+    type,
+    id,
+  }
+}
+
+export const parseBilibiliVideoUrl = (url: URL) => {
+  // https://www.bilibili.com/video/BV1tj42197hU
   const [_, type, id] = url.pathname.split('/')
   return {
     type,

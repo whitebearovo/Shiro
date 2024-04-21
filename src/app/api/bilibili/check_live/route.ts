@@ -18,10 +18,11 @@ export const runtime = 'edge'
 
 export const revalidate = 10
 
-export const GET = async (req: NextRequest) => {
+export const GET = async (req: NextRequest): Promise<Response> => {
   const liveId = req.nextUrl.searchParams.get('liveId')
+  const response = new NextServerResponse()
   if (!liveId) {
-    return new NextServerResponse().status(400).end()
+    return response.status(400).end()
   }
   const queryClient = getQueryClient()
   const res = await queryClient.fetchQuery({
@@ -37,8 +38,6 @@ export const GET = async (req: NextRequest) => {
         .catch(() => null)
     },
   })
-
-  const response = new NextServerResponse()
 
   if (!res?.data) {
     return response.end()
@@ -57,7 +56,7 @@ export const GET = async (req: NextRequest) => {
     .catch(() => null)
 
   if (!userInfo) {
-    return
+    return response.end()
   }
 
   const info = (userInfo as BLUser).data.info

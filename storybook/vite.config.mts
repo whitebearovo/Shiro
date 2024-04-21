@@ -37,14 +37,33 @@ export default defineConfig({
     __ROOT__: `"${__dirname}"`,
     __COMPONENT_ROOT__: `"${resolve(__dirname, '..')}"`,
     'process.env': { ...env },
+    __dirname: `"${__dirname}"`,
   },
+  base: '',
   resolve: {
     alias: {
       'next/image': resolve(__dirname, './mock-packages/next_image'),
       'next/link': resolve(__dirname, './mock-packages/next_link'),
       'next/dynamic': resolve(__dirname, './mock-packages/next_dynamic'),
       'next/navigation': resolve(__dirname, './mock-packages/next_navigation'),
+      'next-runtime-env': resolve(
+        __dirname,
+        './mock-packages/next-runtime-env',
+      ),
       '~': resolve(__dirname, '../src'),
+    },
+  },
+
+  build: {
+    chunkSizeWarningLimit: 2500,
+    target: 'esnext',
+
+    // sourcemap: true,
+    rollupOptions: {
+      output: {
+        // chunkFileNames: `js/[name]-[hash].js`,
+        // entryFileNames: `js/[name]-[hash].js`,
+      },
     },
   },
 

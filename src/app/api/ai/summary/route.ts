@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import type { ArticleDataType } from '~/types/api'
 import type { NextRequest } from 'next/server'
 
 import { sql } from '@vercel/postgres'
@@ -6,23 +7,17 @@ import { sql } from '@vercel/postgres'
 import { API_URL } from '~/constants/env'
 import { apiClient } from '~/lib/request'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
+export const dynamic = 'force-dynamic'
 export const GET = async (req: NextRequest) => {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  })
   const { searchParams } = req.nextUrl
 
   const dataString = searchParams.get('data') as string
   const lang = searchParams.get('lang') || ('zh' as string)
 
-  let data:
-    | { type: 'post'; category: string; slug: string }
-    | { type: 'note'; nid: number }
-    | {
-        type: 'page'
-        slug: string
-      }
+  let data: ArticleDataType
 
   try {
     data = JSON.parse(decodeURIComponent(dataString))
@@ -63,7 +58,7 @@ export const GET = async (req: NextRequest) => {
       break
     }
   }
-  await sql`create table if not exists summary (id int NOT NULL PRIMARY KEY, api_endpoint varchar(30), summary text, lang varchar(10), modified varchar(30), cid varchar(40))`
+  await sql`create table if not exists summary (id SERIAL PRIMARY KEY, api_endpoint varchar(50), summary text, lang varchar(10), modified varchar(30), cid varchar(40))`
 
   const sqlResult =
     await sql`select * from summary where lang = ${lang} and api_endpoint = ${API_URL} and modified = ${modified} and cid = ${cid}`
@@ -87,7 +82,10 @@ export const GET = async (req: NextRequest) => {
     messages: [
       {
         role: 'user',
-        content: `Summarize the following and use a third person description in ${lang} : ${text}`,
+        content: `Summarize this in "${lang}" language:
+"${text}"
+
+CONCISE SUMMARY:`,
       },
     ],
     model: 'gpt-3.5-turbo',

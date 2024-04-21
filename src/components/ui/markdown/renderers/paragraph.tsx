@@ -1,8 +1,8 @@
 import React from 'react'
 import clsx from 'clsx'
-import type { DetailedHTMLProps, FC, HTMLAttributes } from 'react'
+import type { DetailedHTMLProps, FC, HTMLAttributes, ReactNode } from 'react'
 
-import { LinkRenderer } from './LinkRenderer'
+import { BlockLinkRenderer } from './LinkRenderer'
 
 export const MParagraph: FC<
   DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>
@@ -19,10 +19,15 @@ export const MParagraph: FC<
 
     // isLink
     if (isLink(child)) {
-      return <LinkRenderer href={(child as any)?.props?.href} />
+      const children = (child as any)?.props?.children as ReactNode[]
+      return (
+        <BlockLinkRenderer href={(child as any)?.props?.href}>
+          {children}
+        </BlockLinkRenderer>
+      )
     }
   }
-  // console.log(children)
+
   return (
     <p className={clsx('paragraph', className)} {...rest}>
       {children}

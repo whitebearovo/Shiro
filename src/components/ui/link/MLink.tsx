@@ -1,133 +1,115 @@
-import { memo, useCallback } from 'react'
+'use client'
+
+import { memo, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FC, ReactNode } from 'react'
 
-import {
-  isGithubProfileUrl,
-  isTelegramUrl,
-  isTwitterProfileUrl,
-  isZhihuProfileUrl,
-  parseZhihuProfileUrl,
-} from '~/lib/link-parser'
+import { isServerSide } from '~/lib/env'
+import { useAppConfigSelector } from '~/providers/root/aggregation-data-provider'
 
 import { FloatPopover } from '../float-popover'
 import { Favicon } from '../rich-link/Favicon'
-import { RichLink } from '../rich-link/RichLink'
 
 export const MLink: FC<{
   href: string
   title?: string
   children?: ReactNode
   text?: string
-}> = memo(({ href, children, title, text }) => {
+  popper?: boolean
+}> = memo(({ href, children, title, popper = true }) => {
   const router = useRouter()
+  const isSelfUrl = useMemo(() => {
+    if (isServerSide) return false
+    const locateUrl = new URL(location.href)
+
+    let toUrlParser
+    try {
+      toUrlParser = new URL(href)
+    } catch {
+      try {
+        toUrlParser = new URL(href, location.origin)
+      } catch {
+        return false
+      }
+    }
+    return (
+      toUrlParser.host === locateUrl.host ||
+      (process.env.NODE_ENV === 'development' &&
+        toUrlParser.host === 'innei.in')
+    )
+  }, [href])
+
   const handleRedirect = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-      const locateUrl = new URL(location.href)
-
       const toUrlParser = new URL(href)
+      if (!isSelfUrl) {
+        return
+      }
+      e.preventDefault()
+      const pathArr = toUrlParser.pathname.split('/').filter(Boolean)
+      const headPath = pathArr[0]
 
-      if (
-        toUrlParser.host === locateUrl.host ||
-        (process.env.NODE_ENV === 'development' &&
-          toUrlParser.host === 'innei.ren')
-      ) {
-        e.preventDefault()
-        const pathArr = toUrlParser.pathname.split('/').filter(Boolean)
-        const headPath = pathArr[0]
-
-        switch (headPath) {
-          case 'posts':
-          case 'notes':
-          case 'category': {
-            router.push(toUrlParser.pathname)
-            break
-          }
-          default: {
-            window.open(toUrlParser.pathname)
-          }
+      switch (headPath) {
+        case 'posts':
+        case 'notes':
+        case 'category': {
+          router.push(toUrlParser.pathname)
+          break
+        }
+        default: {
+          window.open(toUrlParser.pathname)
         }
       }
     },
-    [href, router],
+    [href, isSelfUrl, router],
   )
 
-  let parsedType = ''
-  let parsedName = ''
-  try {
-    const url = new URL(href)
-    switch (true) {
-      case isGithubProfileUrl(url): {
-        parsedType = 'GH'
-        parsedName = url.pathname.split('/')[1]
-        break
-      }
-      case isTwitterProfileUrl(url): {
-        parsedType = 'TW'
-        parsedName = url.pathname.split('/')[1]
-        break
-      }
-      case isTelegramUrl(url): {
-        parsedType = 'TG'
-        parsedName = url.pathname.split('/')[1]
-        break
-      }
-      case isZhihuProfileUrl(url): {
-        parsedType = 'ZH'
-        parsedName = parseZhihuProfileUrl(url).id
-      }
-    }
-  } catch {
-    /* empty */
-  }
+  const el = (
+    <span className="inline items-center font-sans">
+      {isSelfUrl ? <BizSelfFavicon /> : <Favicon href={href} />}
+      <a
+        className="shiro-link--underline"
+        href={href}
+        target="_blank"
+        onClick={handleRedirect}
+        title={title}
+        rel="noreferrer"
+      >
+        {children}
+      </a>
 
-  const showRichLink = !!parsedType && !!parsedName
-
+      <i className="icon-[mingcute--arrow-right-up-line] translate-y-[2px] opacity-70" />
+    </span>
+  )
+  if (!popper) return el
   return (
     <FloatPopover
       as="span"
       wrapperClassName="!inline"
       type="tooltip"
-      TriggerComponent={useCallback(
-        () => (
-          <span className="inline items-center">
-            {!showRichLink && <Favicon href={href} />}
-            {showRichLink ? (
-              <RichLink
-                name={text || parsedName}
-                source={parsedType}
-                href={href}
-              />
-            ) : (
-              <a
-                className="shiro-link--underline"
-                href={href}
-                target="_blank"
-                onClick={handleRedirect}
-                title={title}
-                rel="noreferrer"
-              >
-                {children}
-              </a>
-            )}
-
-            <i className="icon-[mingcute--external-link-line] translate-y-[2px]" />
-          </span>
-        ),
-        [
-          handleRedirect,
-          children,
-          href,
-          title,
-          showRichLink,
-          parsedName,
-          parsedType,
-          text,
-        ],
-      )}
+      triggerElement={el}
     >
-      <span>{href}</span>
+      <a href={href} target="_blank" rel="noreferrer">
+        <span>{href}</span>
+      </a>
     </FloatPopover>
   )
 })
 MLink.displayName = 'MLink'
+
+const BizSelfFavicon = () => {
+  const { favicon, faviconDark } = useAppConfigSelector((a) => a.site) || {}
+  if (!favicon && !faviconDark) return null
+  return (
+    <span className="mr-1 inline-flex size-4 center">
+      <img
+        className="inline size-4 dark:hidden"
+        src={favicon ? favicon : faviconDark ? faviconDark : ''}
+      />
+      <img
+        className="hidden size-4 dark:inline"
+        src={faviconDark ? faviconDark : favicon ? favicon : ''}
+      />
+    </span>
+  )
+}

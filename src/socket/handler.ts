@@ -2,23 +2,31 @@ import { queryClient } from '~/providers/root/react-query-provider'
 import React from 'react'
 import { produce } from 'immer'
 import type {
+  CommentModel,
   NoteModel,
   PaginateResult,
   PostModel,
   RecentlyModel,
   SayModel,
 } from '@mx-space/api-client'
+import type { BusinessEvents } from '@mx-space/webhook'
 import type { InfiniteData } from '@tanstack/react-query'
-import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context'
+import type { ActivityPresence } from '~/models/activity'
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
-import { sayQueryKey } from '~/app/says/query'
 import { setOnlineCount } from '~/atoms'
-import { setActivityMediaInfo, setActivityProcessName } from '~/atoms/activity'
+import {
+  deleteActivityPresence,
+  setActivityMediaInfo,
+  setActivityPresence,
+  setActivityProcessInfo,
+} from '~/atoms/activity'
 import {
   FaSolidFeatherAlt,
   IcTwotoneSignpost,
   MdiLightbulbOn20,
 } from '~/components/icons/menu-collection'
+import { sayQueryKey } from '~/components/modules/say/hooks'
 import { DOMCustomEvents } from '~/constants/event'
 import { TrackerAction } from '~/constants/tracker'
 import { isDev } from '~/lib/env'
@@ -36,7 +44,11 @@ import {
   getGlobalCurrentPostData,
   setGlobalCurrentPostData,
 } from '~/providers/post/CurrentPostDataProvider'
+import { queries } from '~/queries/definition'
+import { buildCommentsQueryKey } from '~/queries/keys'
 import { EventTypes } from '~/types/events'
+
+import { WsEvent } from './util'
 
 const trackerRealtimeEvent = () => {
   document.dispatchEvent(
@@ -145,7 +157,8 @@ export const eventHandler = (
       break
     }
 
-    case EventTypes.PAGE_UPDATED: {
+    case EventTypes.PAGE_UPDATED:
+    case EventTypes.PAGE_UPDATE: {
       const { slug } = data
       if (getCurrentPageData()?.slug === slug) {
         setCurrentPageData((draft) => {
@@ -224,13 +237,102 @@ export const eventHandler = (
       break
     }
 
+    case EventTypes.ACTIVITY_UPDATE_PRESENCE: {
+      const payload = data as ActivityPresence
+      const queryKey = queries.activity.presence(payload.roomName).queryKey
+      const queryState = queryClient.getQueryState(queryKey)
+      queryClient.cancelQueries({
+        queryKey,
+      })
+
+      setActivityPresence(data)
+      if (!queryState?.data) {
+        queryClient.invalidateQueries({
+          queryKey,
+        })
+      }
+
+      break
+    }
+
+    case EventTypes.COMMENT_CREATE: {
+      const payload = data as {
+        ref: string
+        id: string
+      }
+
+      const queryData = queryClient.getQueryData<
+        InfiniteData<PaginateResult<CommentModel>>
+      >(buildCommentsQueryKey(payload.ref))
+
+      if (!queryData) return
+      for (const page of queryData.pages) {
+        if (page.data.some((comment) => comment.id === payload.id)) {
+          return
+        }
+      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          queryClient.invalidateQueries({
+            queryKey: buildCommentsQueryKey(payload.ref),
+          })
+        })
+      })
+
+      break
+    }
+
+    case EventTypes.ACTIVITY_LEAVE_PRESENCE: {
+      const payload = data as {
+        identity: string
+        roomName: string
+      }
+
+      queryClient.cancelQueries({
+        queryKey: queries.activity.presence(payload.roomName).queryKey,
+      })
+      deleteActivityPresence(payload.identity)
+      break
+    }
+    case EventTypes.ARTICLE_READ_COUNT_UPDATE: {
+      const { id, count, type } = data
+      if (!count) {
+        break
+      }
+
+      switch (type) {
+        case 'post': {
+          const currentData = getGlobalCurrentPostData()
+          if (currentData?.id === id) {
+            setGlobalCurrentPostData((draft) => {
+              draft.count.read = count
+            })
+          }
+          break
+        }
+        case 'note': {
+          const currentData = getCurrentNoteData()?.data
+          if (currentData?.id === id) {
+            setCurrentNoteData((draft) => {
+              draft.data.count.read = count
+            })
+          }
+          break
+        }
+      }
+      break
+    }
+
     case 'fn#media-update': {
       setActivityMediaInfo(data)
       break
     }
 
     case 'fn#ps-update': {
-      setActivityProcessName(data.process)
+      const process = data.processInfo as ProcessInfo
+
+      setActivityProcessInfo(process)
       break
     }
 
@@ -245,8 +347,16 @@ export const eventHandler = (
 
     default: {
       if (isDev) {
+        // eslint-disable-next-line no-console
         console.log(type, data)
       }
     }
   }
+  WsEvent.emit(type as BusinessEvents, data)
+}
+
+interface ProcessInfo {
+  name: string
+  description: string
+  iconBase64: string
 }

@@ -12,7 +12,7 @@
 - [可愛い松](https://blog.wibus.ren/)
 - [HuaSui](https://www.vlo.cc/)
 - [天翔 TNXG](https://tnxg.top)
-- [Star](https://xingbest.xyz)
+- [Star](https://www.xingbest.fun)
 
 欢迎你来体验 Shiro 的魅力！
 
@@ -24,19 +24,31 @@
 4. :bell: **接入 WebSocket，实时获取最新的文章通知**：通过 WebSocket，访客能够实时获取最新的文章通知。
 5. :computer: **实时活动状态展示**：配合 [ProcessReporter](https://github.com/mx-space/ProcessReporterMac)，可以在主页上显示实时活动状态。
 6. :pencil: **Markdown 的扩展语法**：支持更多的 Markdown 扩展语法，等待你的发掘和使用。
+7. :zap: **轻量级管理面板**：可以在管理面板中管理文章、评论等。
 
 ## :wrench: 技术栈
 
-- NextJS 13 (App Router)
+- NextJS (App Router)
 - Jotai
 - Framer motion
 - Radix UI
 - Socket.IO
 - TailwindCSS
 
+## 📄 使用文档
+
+前往：https://mx-space.js.org/themes/shiro
+
+感谢 @wibus-wee 和 @wuhang2003 等其他社区贡献者编写。
+
 ## :camera: 截图
 
 <img width="1471" alt="Live Demo" src="https://github.com/Innei/Shiro/assets/41265413/bf8af4ec-0f0c-441a-8c06-4b44e1649597">
+
+轻管理面板：
+
+![](https://github.com/Innei/Shiro/assets/41265413/4bb5b34a-3ce2-45da-bec7-4596ac87f849)
+![](https://github.com/Innei/Shiro/assets/41265413/592941d0-2ebe-4d64-bd77-3171829bd896)
 
 <details>
 <summary>
@@ -58,37 +70,44 @@
 
 [看这里](https://mx-space.js.org/themes/shiro).
 
-## :whale: Docker 部署
+## :whale: 运行
 
-### :books: docker-compose
+### :hammer: 通过预构建运行
 
-1. change the args inside `docker-compose.yml`
+首先在 `https://github.com/Innei/Shiro/releases` 中下载预构建好的 `release.zip`。然后解压它。
 
-2. run command
-
-```bash
-    docker-compose up -d
+```sh
+cd standalone
+vim .env # 修改你的 ENV 变量
+export PORT=2323
+node server.js
 ```
 
-### :package: docker run
+### :books: 推荐使用 Docker Compose
 
-```bash
-docker build \
- --build-arg BASE_URL=REPLACE_WITH_YOUR_BASE_URL \
- --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=REPLACE_WITH_YOUR_PUBLISHABLE_KEY \
- --build-arg CLERK_SECRET_KEY=REPLACE_WITH_YOUR_SECRET_KEY \
- -t shiro . --load
+```sh
+mkdir shiro
+cd shiro
+wget https://raw.githubusercontent.com/Innei/Shiro/main/docker-compose.yml
+wget https://raw.githubusercontent.com/Innei/Shiro/main/.env.template .env
+
+vim .env # 修改你的 ENV 变量
+docker compose up -d
+
+docker compose pull # 后续更新镜像
 ```
 
-```bash
-docker run --name shiro -d -p 2323:2323 shiro
-```
+## Markdown 扩展语法
+
+请阅读 https://shiro.innei.in/#/markdown
 
 ## :heart: 鸣谢 & 许可
 
-2023 © Innei，本项目采用 MIT 许可证发布。
+2023 © Innei，本软件遵循 AGPLv3 许可证，附加特定的商业使用条件。此外，使用本项目还需要遵循[附加条款和条件](ADDITIONAL_TERMS.md)。
 
-感谢 GPT-4 和 [cali.so](https://github.com/CaliCastle/cali.so) 的支持，以及 Mix Space Team 和广大社区朋友们的贡献。
+部分代码参考自 GPT-4 和 [cali.so](https://github.com/CaliCastle/cali.so)。
+
+感谢 Mix Space Team 和广大社区朋友们的贡献。
 
 ![powered-by-vercel](https://images.ctfassets.net/e5382hct74si/78Olo8EZRdUlcDUFQvnzG7/fa4cdb6dc04c40fceac194134788a0e2/1618983297-powered-by-vercel.svg)
 

@@ -1,6 +1,6 @@
 import { createElement, Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { createBrowserRouter } from 'react-router-dom'
+import { createHashRouter } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
 
 import {
@@ -8,7 +8,7 @@ import {
   laziedComponents,
   // mdxName2PromiseMapping,
 } from './glob'
-import Debug from './routes/debug'
+// import Debug from './routes/debug'
 import { Root } from './routes/root'
 
 const renderFromComponents = componentsKeys.map((key, index) => {
@@ -29,12 +29,12 @@ const children = [...renderFromComponents].sort((a, b) => {
   return a.name.localeCompare(b.name)
 })
 
-children.push({
-  path: 'debug',
-  Component: Debug,
-  name: 'debug',
-})
-export const routes = createBrowserRouter([
+// children.push({
+//   path: 'debug',
+//   Component: Debug,
+//   name: 'debug',
+// })
+export const routes = createHashRouter([
   {
     path: '/',
     Component: Root,

@@ -13,6 +13,7 @@ import {
   IonBook,
   MdiFlask,
   MdiLightbulbOn20,
+  RMixPlanet,
 } from '~/components/icons/menu-collection'
 
 export interface IHeaderMenu {
@@ -20,7 +21,8 @@ export interface IHeaderMenu {
   path: string
   type?: string
   icon?: ReactNode
-  subMenu?: IHeaderMenu[]
+  subMenu?: Omit<IHeaderMenu, 'exclude'>[]
+  exclude?: string[]
 }
 export const headerMenuConfig: IHeaderMenu[] = [
   {
@@ -42,10 +44,11 @@ export const headerMenuConfig: IHeaderMenu[] = [
     type: 'Note',
     path: '/notes',
     icon: h(FaSolidFeatherAlt),
+    exclude: ['/notes/topics'],
   },
 
   {
-    title: '速览',
+    title: '时光',
     icon: h(FaSolidHistory),
     path: '/timeline',
     subMenu: [
@@ -99,11 +102,11 @@ export const headerMenuConfig: IHeaderMenu[] = [
         path: '/says',
         icon: h(FaSolidComments),
       },
+      {
+        title: '跃迁',
+        icon: h(RMixPlanet),
+        path: 'https://travel.moe/go.html',
+      },
     ],
   },
-  // {
-  //   title: '开往',
-  //   icon: h(FaSolidSubway),
-  //   path: 'https://travellings.link',
-  // },
 ]

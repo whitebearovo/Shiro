@@ -1,6 +1,57 @@
-## Basic
 
-### Table
+
+## List and GFM Tasks
+
+1. First
+2. Second
+   1. 2.1
+   2. 2.2
+      1. 3.1
+3. Third
+4. Fourth
+
+- [ ] Checkbox
+- [x] Checkbox Completed
+
+---
+
+- Line
+  - Line 1.1
+- Line 2
+
+## Definition lists
+
+Term 1
+
+: Definition 1
+with lazy continuation.
+
+Term 2 with _inline markup_
+
+: Definition 2
+
+        { some code, part of Definition 2 }
+
+    Third paragraph of definition 2.
+
+_Compact style:_
+
+Term 1
+~ Definition 1
+
+Term 2
+~ Definition 2a
+~ Definition 2b
+
+## [Abbreviations](https://github.com/markdown-it/markdown-it-abbr)
+
+This is HTML abbreviation example.
+
+It converts "HTML", but keep intact partial entries like "xxxHTMLyyy" and so on.
+
+\*[HTML]: Hyper Text Markup Language
+
+## Table
 
 | 表达内容                                                                                                                                 | 示例          |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
@@ -25,6 +76,18 @@ $ c = \pm\sqrt{a^2 + b^2} $
 
 ## Container
 
+### banner
+
+```
+::: warning
+_here be dragons_
+:::
+
+::: banner {error}
+_here be dragons_
+:::
+```
+
 ::: warning
 _here be dragons_
 :::
@@ -33,12 +96,118 @@ _here be dragons_
 _here be dragons_
 :::
 
+### Gallery
+
+```
 ::: gallery
 https://loremflickr.com/640/480/city?1
 https://loremflickr.com/640/480/city?2
 https://loremflickr.com/640/480/city?3
 ![](https://loremflickr.com/640/480/city?4 'Image')
 :::
+
+```
+
+::: gallery
+https://loremflickr.com/640/480/city?1
+https://loremflickr.com/640/480/city?2
+https://loremflickr.com/640/480/city?3
+![](https://loremflickr.com/640/480/city?4 'Image')
+:::
+
+### Grid
+
+```md
+::: grid {cols=3,gap=4}
+
+Grid 1
+
+Grid 2
+
+Grid 3
+
+https://loremflickr.com/640/480/city?1
+
+https://loremflickr.com/640/480/city?2
+
+https://loremflickr.com/640/480/city?3
+
+![](https://loremflickr.com/640/480/city?4 'Image')
+
+![](https://loremflickr.com/640/480/city?4 'Image')
+
+![](https://loremflickr.com/640/480/city?4 'Image')
+
+:::
+```
+
+::: grid {cols=3,gap=4}
+
+Grid 1
+
+Grid 2
+
+Grid 3
+
+https://loremflickr.com/640/480/city?1
+
+https://loremflickr.com/640/480/city?2
+
+https://loremflickr.com/640/480/city?3
+
+![](https://loremflickr.com/640/480/city?4)
+
+![](https://loremflickr.com/640/480/city?6)
+
+![](https://loremflickr.com/640/480/city?40)
+
+:::
+
+### Images Grid
+
+```md
+::: grid {cols=2,rows=2,gap=4,type=images}
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+:::
+```
+
+::: grid {cols=3,rows=3,gap=12,type=images}
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+:::
+
+```
+::: grid {cols=3,rows=2,gap=12,type=images}
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+:::
+
+```
+
+::: grid {cols=3,rows=2,gap=12,type=images}
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+![](https://loremflickr.com/640/480/city?4)
+:::
+
+
 
 ## Rich Link
 
@@ -79,16 +248,34 @@ https://codesandbox.io/s/framer-motion-layoutroot-prop-forked-p39g96
 https://codesandbox.io/s/framer-motion-layoutroot-prop-forked-p39g96
 
 ```
-https://github.com/toeverything/AFFiNE/blob/master/.github/workflows/nx.yml
+https://github.com/Innei/Shiro/blob/108d4c3e927e1c9c9304e41a0631f91958477d9f/src/providers/root/modal-stack-provider.tsx
 ```
 
-https://github.com/toeverything/AFFiNE/blob/master/.github/workflows/nx.yml
+https://github.com/Innei/Shiro/blob/108d4c3e927e1c9c9304e41a0631f91958477d9f/src/providers/root/modal-stack-provider.tsx
 
 ```
-https://github.com/toeverything/AFFiNE/blob/himself65/0710/remove-effect/apps/web/src/atoms/index.ts
+https://github.com/Innei/Shiro/pull/129
 ```
 
-https://github.com/toeverything/AFFiNE/blob/himself65/0710/remove-effect/apps/web/src/atoms/index.ts
+https://github.com/Innei/Shiro/pull/129
+
+```
+https://github.com/Innei/Shiro/commit/6957e011439eb2d3cbf42bfb67ed81b07d4bcc2a
+```
+
+https://github.com/Innei/Shiro/commit/6957e011439eb2d3cbf42bfb67ed81b07d4bcc2a
+
+```
+https://trpc.io/docs/client/react/useInfiniteQuery
+```
+
+https://trpc.io/docs/client/react/useInfiniteQuery
+
+```
+[TRPC](https://trpc.io/docs/client/react/useInfiniteQuery)
+```
+
+[TRPC](https://trpc.io/docs/client/react/useInfiniteQuery)
 
 ## LinkCard
 
@@ -137,3 +324,103 @@ Inline https://github.com/Innei
 ```
 
 [Innei 太菜了]{GH@Innei}
+
+## Alerts
+
+```
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+```
+
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+
+## KateX
+
+```
+$ c = \pm\sqrt{a^2 + b^2} $
+```
+
+$ c = \pm\sqrt{a^2 + b^2} $
+
+```
+$c = \pm\sqrt{a^2 + b^2}$
+```
+
+$c = \pm\sqrt{a^2 + b^2}$
+
+$P(x) = a_nx^n+a_{n-1}x^{n-1} + \dots + a_1x + a_0$
+
+```
+$P(x) = a_nx^n+a_{n-1}x^{n-1} + \dots + a_1x + a_0$
+```
+
+```
+$$
+
+P\left(U,T\right)=100\left.\left(0.6\min\left(1,\frac{U-0.70}{0.90-0.70}\right)+0.4\min\left(1,\frac{T-4000}{14000-4000}\right)\right)\right.
+
+$$
+```
+
+$$
+
+P\left(U,T\right)=100\left.\left(0.6\min\left(1,\frac{U-0.70}{0.90-0.70}\right)+0.4\min\left(1,\frac{T-4000}{14000-4000}\right)\right)\right.
+
+
+$$
+
+
+## Excalidraw
+
+```excalidraw
+{"type":"excalidraw/clipboard","elements":[{"type":"rectangle","version":14,"versionNonce":1361369853,"isDeleted":false,"id":"_PSpf6pLwkWIJubC_tf9D","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"angle":0,"x":545.0390625,"y":387.296875,"strokeColor":"#1e1e1e","backgroundColor":"transparent","width":177.53515625,"height":138.328125,"seed":1495751197,"groupIds":[],"frameId":null,"roundness":{"type":3},"boundElements":[],"updated":1706954302946,"link":null,"locked":false}],"files":{}}
+```
+
+````markdown
+```excalidraw
+{"type":"excalidraw/clipboard","elements":[{"type":"rectangle","version":14,"versionNonce":1361369853,"isDeleted":false,"id":"_PSpf6pLwkWIJubC_tf9D","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"angle":0,"x":545.0390625,"y":387.296875,"strokeColor":"#1e1e1e","backgroundColor":"transparent","width":177.53515625,"height":138.328125,"seed":1495751197,"groupIds":[],"frameId":null,"roundness":{"type":3},"boundElements":[],"updated":1706954302946,"link":null,"locked":false}],"files":{}}
+```
+````
+
+## React Remote Component Render
+<!-- 
+```component
+import=http://127.0.0.1:2333/snippets/js/components
+name=MyComponents.Card
+```
+
+````markdown
+```component
+import=http://127.0.0.1:2333/snippets/js/components
+name=MyComponents.Card
+```
+```` -->
+
+
+```component
+import=https://cdn.jsdelivr.net/npm/@innei/react-cdn-components@0.0.7/dist/components/Firework.js
+name=MDX.Firework
+height=25
+```
+
+````markdown
+```component
+import=https://cdn.jsdelivr.net/npm/@innei/react-cdn-components@0.0.7/dist/components/Firework.js
+name=MDX.Firework
+height=25
+```
+````
+

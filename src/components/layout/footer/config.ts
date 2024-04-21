@@ -1,5 +1,3 @@
-import type { LinkSection, OtherInfo } from '~/app/config'
-
 export const defaultLinkSections: LinkSection[] = [
   {
     name: '关于',
@@ -46,7 +44,7 @@ export const defaultLinkSections: LinkSection[] = [
       },
       {
         name: '发邮件',
-        href: 'mailto:i@innei.ren',
+        href: 'mailto:i@innei.in',
         external: true,
       },
       {

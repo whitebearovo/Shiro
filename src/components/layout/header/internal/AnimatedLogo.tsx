@@ -4,13 +4,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { AnimatePresence, m } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import type { Bilibili } from '~/app/config'
 
-import { getAdminUrl, isLogged, useViewport } from '~/atoms'
+import { isLogged } from '~/atoms'
+import { useResolveAdminUrl, useViewport } from '~/atoms/hooks'
 import { useSingleAndDoubleClick } from '~/hooks/common/use-single-double-click'
 import { noopObj } from '~/lib/noop'
 import { Routes } from '~/lib/route-builder'
-import { toast } from '~/lib/toast'
 import { useAppConfigSelector } from '~/providers/root/aggregation-data-provider'
 
 import { Activity } from './Activity'
@@ -33,6 +32,8 @@ const TapableLogo = () => {
     window.open(`https://live.bilibili.com/${liveId}`)
   }, [liveId])
 
+  const resolveAdminUrl = useResolveAdminUrl()
+
   const fn = useSingleAndDoubleClick(
     () => {
       if (isLiving) return goLive()
@@ -40,11 +41,8 @@ const TapableLogo = () => {
     },
     () => {
       if (isLogged()) {
-        const adminUrl = getAdminUrl()
-        if (adminUrl) location.href = adminUrl
-        else {
-          toast.error('Admin url not found')
-        }
+        location.href = resolveAdminUrl()
+
         return
       }
       router.push(
@@ -81,7 +79,7 @@ export const AnimatedLogo = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          // className="scale-75"
+          className="flex items-center"
         >
           <Activity />
           <TapableLogo />

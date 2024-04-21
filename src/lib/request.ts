@@ -1,66 +1,143 @@
-import type { AxiosError, AxiosInstance } from 'axios'
+import { nanoid } from 'nanoid'
+import { createFetch } from 'ofetch'
+import type { IRequestAdapter } from '@mx-space/api-client'
 
-import {
-  allControllers,
-  createClient,
-  RequestError,
-} from '@mx-space/api-client'
-import { axiosAdaptor } from '@mx-space/api-client/dist/adaptors/axios'
+import { allControllers, createClient } from '@mx-space/api-client'
 
+import { isLogged } from '~/atoms'
 import { API_URL } from '~/constants/env'
 
 import PKG from '../../package.json'
 import { getToken } from './cookie'
 import { isDev, isServerSide } from './env'
 
-const genUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
+const uuidStorageKey = 'x-uuid'
+const uuid = nanoid()
+
+const globalConfigureHeader = {} as any
+const globalConfigureSearchParams = {} as any
+
+if (isServerSide) {
+  globalConfigureHeader['User-Agent'] =
+    `NextJS/v${PKG.dependencies.next} ${PKG.name}/${PKG.version}`
 }
-const uuid = genUUID()
 
-export const apiClient = createClient(axiosAdaptor)(API_URL, {
+const $fetch = createFetch({
+  defaults: {
+    timeout: 8000,
+    // next: { revalidate: 3 },
+    headers: globalConfigureHeader,
+    onRequest(context) {
+      const token = getToken()
+      const headers: any = context.options.headers ?? {}
+      if (token) {
+        headers['Authorization'] = `bearer ${token}`
+      }
+
+      headers['x-session-uuid'] =
+        globalThis?.sessionStorage?.getItem(uuidStorageKey) ?? uuid
+
+      if (isLogged()) {
+        context.options.params = {
+          ...context.options.params,
+          ts: Date.now(),
+        }
+      }
+
+      context.options.params ??= {}
+      Object.assign(context.options.params, globalConfigureSearchParams)
+      if (context.options.params.token) {
+        context.options.cache = 'no-store'
+      }
+      if (isDev && isServerSide) {
+        // eslint-disable-next-line no-console
+        console.log(`[Request]: ${context.request}`)
+      }
+    },
+    onResponse(context) {
+      // log response
+      if (isDev && isServerSide) {
+        // eslint-disable-next-line no-console
+        console.log(`[Response]: ${context.request}`, context.response.status)
+      }
+    },
+  },
+})
+
+const fetchAdapter: IRequestAdapter<typeof $fetch> = {
+  default: $fetch,
+  get(url: string, options) {
+    const { params } = options || {}
+    return $fetch(url, {
+      method: 'GET',
+      query: params,
+    })
+  },
+  post(url: string, options) {
+    const { params, data } = options || {}
+    return $fetch(url, {
+      method: 'post',
+      query: params,
+      body: data,
+    })
+  },
+  put(url: string, options) {
+    const { params, data } = options || {}
+    return $fetch(url, {
+      method: 'put',
+      query: params,
+      body: data,
+    })
+  },
+  patch(url: string, options) {
+    const { params, data } = options || {}
+    return $fetch(url, {
+      method: 'patch',
+      query: params,
+      body: data,
+    })
+  },
+  delete(url: string, options) {
+    const { params, data } = options || {}
+    return $fetch(url, {
+      method: 'delete',
+      query: params,
+      body: data,
+    })
+  },
+}
+
+export const apiClient = createClient(fetchAdapter)(API_URL, {
   controllers: allControllers,
+  getDataFromResponse(response) {
+    return response as any
+  },
 })
 
-export const $axios = axiosAdaptor.default as AxiosInstance
+export const attachFetchHeader = (key: string, value: string | null) => {
+  const original = globalConfigureHeader[key]
+  if (value === null) {
+    delete globalConfigureHeader[key]
+  } else {
+    globalConfigureHeader[key] = value
+  }
 
-$axios.defaults.timeout = 8000
-
-if (typeof window === 'undefined')
-  $axios.defaults.headers.common[
-    'User-Agent'
-  ] = `NextJS/v${PKG.dependencies.next} ${PKG.name}/${PKG.version}`
-
-$axios.interceptors.request.use((config) => {
-  const token = getToken()
-  if (config.headers) {
-    if (token) {
-      config.headers['Authorization'] = token
+  return () => {
+    if (typeof original === 'undefined') {
+      delete globalConfigureHeader[key]
+    } else {
+      globalConfigureHeader[key] = original
     }
-    config.headers['x-uuid'] = uuid
   }
+}
 
-  if (isDev && isServerSide) {
-    console.log(`[Request]: ${config.url}`)
-  }
+export const setGlobalSearchParams = (params: Record<string, any>) => {
+  clearGlobalSearchParams()
+  Object.assign(globalConfigureSearchParams, params)
+}
 
-  return config
-})
-
-export const getErrorMessageFromRequestError = (error: RequestError) => {
-  if (!(error instanceof RequestError)) return (error as Error).message
-  const axiosError = error.raw as AxiosError
-  const messagesOrMessage = (axiosError.response?.data as any)?.message
-  const bizMessage =
-    typeof messagesOrMessage === 'string'
-      ? messagesOrMessage
-      : Array.isArray(messagesOrMessage)
-      ? messagesOrMessage[0]
-      : undefined
-
-  return bizMessage || axiosError.message
+export const clearGlobalSearchParams = () => {
+  Object.keys(globalConfigureSearchParams).forEach((key) => {
+    delete globalConfigureSearchParams[key]
+  })
 }

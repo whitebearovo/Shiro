@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useEffect, useRef } from 'react'
+import React, { memo, useEffect, useRef } from 'react'
 import { createContextState } from 'foxact/create-context-state'
 import { useIsomorphicLayoutEffect } from 'foxact/use-isomorphic-layout-effect'
 
@@ -26,9 +26,9 @@ const [
 })
 
 const [
-  ElementPositsionProviderInternal,
-  useWrappedElementPositsion,
-  useSetElementPositsion,
+  ElementPositionProviderInternal,
+  useWrappedElementPosition,
+  useSetElementPosition,
 ] = createContextState({
   x: 0,
   y: 0,
@@ -36,27 +36,39 @@ const [
 
 const [
   IsEOArticleElementProviderInternal,
-  useIsEOWrappedElement,
+  useIsEoFWrappedElement,
   useSetIsEOArticleElement,
 ] = createContextState<boolean>(false)
 
 const Providers = [
   <WrappedElementProviderInternal key="ArticleElementProviderInternal" />,
   <ElementSizeProviderInternal key="ElementSizeProviderInternal" />,
-  <ElementPositsionProviderInternal key="ElementPositsionProviderInternal" />,
+  <ElementPositionProviderInternal key="ElementPositionProviderInternal" />,
   <IsEOArticleElementProviderInternal key="IsEOArticleElementProviderInternal" />,
 ]
-const WrappedElementProvider: Component = ({ children, className }) => {
+
+interface WrappedElementProviderProps {
+  eoaDetect?: boolean
+  as?: keyof React.JSX.IntrinsicElements
+}
+
+export const WrappedElementProvider: Component<WrappedElementProviderProps> = ({
+  children,
+  className,
+  ...props
+}) => {
   return (
     <ProviderComposer contexts={Providers}>
       <ArticleElementResizeObserver />
-      <Content className={className}>{children}</Content>
+      <Content {...props} className={className}>
+        {children}
+      </Content>
     </ProviderComposer>
   )
 }
 const ArticleElementResizeObserver = () => {
   const setSize = useSetWrappedElementSize()
-  const setPos = useSetElementPositsion()
+  const setPos = useSetElementPosition()
   const $article = useWrappedElement()
   useIsomorphicLayoutEffect(() => {
     if (!$article) return
@@ -80,16 +92,19 @@ const ArticleElementResizeObserver = () => {
   return null
 }
 
-const Content: Component = memo(({ children, className }) => {
-  const setElement = useSetWrappedElement()
+const Content: Component<WrappedElementProviderProps> = memo(
+  ({ children, className, eoaDetect, as = 'div' }) => {
+    const setElement = useSetWrappedElement()
 
-  return (
-    <div className={clsxm('relative', className)} ref={setElement}>
-      {children}
-      <EOADetector />
-    </div>
-  )
-})
+    const As = as as any
+    return (
+      <As className={clsxm('relative', className)} ref={setElement}>
+        {children}
+        {eoaDetect && <EOADetector />}
+      </As>
+    )
+  },
+)
 
 Content.displayName = 'ArticleElementProviderContent'
 
@@ -104,7 +119,7 @@ const EOADetector: Component = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0]
-        // if (yhRef.current < ) return
+
         if (!entry.isIntersecting) {
           if (getDir.current === 'down') {
             return
@@ -129,10 +144,9 @@ const EOADetector: Component = () => {
 }
 
 export {
-  WrappedElementProvider,
   useSetWrappedElement,
   useWrappedElement,
-  useIsEOWrappedElement,
+  useIsEoFWrappedElement,
   useWrappedElementSize,
-  useWrappedElementPositsion,
+  useWrappedElementPosition,
 }

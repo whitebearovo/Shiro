@@ -1,8 +1,8 @@
-import { atom, useAtomValue } from 'jotai'
+import { queryClient } from '~/providers/root/react-query-provider'
+import { atom } from 'jotai'
 
 import { apiClient } from '~/lib/request'
 import { jotaiStore } from '~/lib/store'
-import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
 
 export interface UrlConfig {
   adminUrl: string
@@ -10,32 +10,23 @@ export interface UrlConfig {
   webUrl: string
 }
 
-const adminUrlAtom = atom<string | null>(null)
+export const adminUrlAtom = atom<string | null>(null)
+export const webUrlAtom = atom<string | null>(null)
 
 export const fetchAppUrl = async () => {
-  const { data } = await apiClient.proxy.options.url.get<{
-    data: UrlConfig
-  }>()
+  const { data } = await queryClient.fetchQuery({
+    queryKey: ['app.url'],
+    queryFn: () =>
+      apiClient.proxy.options.url.get<{
+        data: UrlConfig
+      }>(),
+  })
 
-  jotaiStore.set(adminUrlAtom, data.adminUrl)
+  if (data.adminUrl) jotaiStore.set(adminUrlAtom, data.adminUrl)
+  jotaiStore.set(webUrlAtom, data.webUrl)
+  return data
 }
 
+export const getWebUrl = () => jotaiStore.get(webUrlAtom)
+export const setWebUrl = (url: string) => jotaiStore.set(webUrlAtom, url)
 export const getAdminUrl = () => jotaiStore.get(adminUrlAtom)
-export const useAppUrl = () => {
-  const url = useAggregationSelector((a) => a.url)
-  const adminUrl = useAtomValue(adminUrlAtom)
-  return {
-    adminUrl,
-    ...url,
-  }
-}
-
-export const useResolveAdminUrl = () => {
-  const { adminUrl } = useAppUrl()
-  return (path: string) => {
-    if (!adminUrl) {
-      return ''
-    }
-    return adminUrl.replace(/\/$/, '').concat(path || '')
-  }
-}

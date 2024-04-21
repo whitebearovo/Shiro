@@ -45,7 +45,6 @@ const MemoedHeader = memo(() => {
         <HeaderLogoArea>
           <AnimatedLogo />
 
-          {/* <SiteOwnerAvatar className="absolute bottom-[10px] right-[2px] hidden lg:inline-block" /> */}
           <OnlyMobile>
             <HeaderMeta />
           </OnlyMobile>
@@ -56,7 +55,7 @@ const MemoedHeader = memo(() => {
           <HeaderMeta />
         </HeaderCenterArea>
 
-        <div className="flex h-full w-full items-center">
+        <div className="flex size-full items-center">
           <UserAuth />
         </div>
       </div>

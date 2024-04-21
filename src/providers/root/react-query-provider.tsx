@@ -1,56 +1,64 @@
 'use client'
 
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { del, get, set } from 'idb-keyval'
-import type {
-  PersistedClient,
-  Persister,
-  PersistQueryClientOptions,
-} from '@tanstack/react-query-persist-client'
+import { useState } from 'react'
+import { createStore, del, get, set } from 'idb-keyval'
+import type { PersistQueryClientOptions } from '@tanstack/react-query-persist-client'
 import type { PropsWithChildren } from 'react'
 
-const idbValidKey = 'reactQuery'
-const persister = {
-  persistClient: async (client: PersistedClient) => {
-    set(idbValidKey, client)
+import { RequestError } from '@mx-space/api-client'
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
+
+import { isServerSide } from '~/lib/env'
+
+const dbStore = isServerSide ? undefined : createStore('react-query', 'queries')
+
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: {
+    getItem: async (key) => {
+      const value = await get(key, dbStore)
+      return value
+    },
+    setItem: async (key, value) => {
+      await set(key, value, dbStore)
+    },
+    removeItem: async (key) => {
+      await del(key, dbStore)
+    },
   },
-  restoreClient: async () => {
-    return await get<PersistedClient>(idbValidKey)
-  },
-  removeClient: async () => {
-    await del(idbValidKey)
-  },
-} as Persister
+})
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-
       refetchOnWindowFocus: false,
       refetchIntervalInBackground: false,
     },
   },
 })
 
-const persistOptions = {
-  persister,
+const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
+  persister: asyncStoragePersister,
   maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
   dehydrateOptions: {
     shouldDehydrateQuery: (query) => {
-      const queryIsReadyForPersistance = query.state.status === 'success'
+      const queryIsReadyForPersistence = query.state.status === 'success'
 
       if (query.meta?.persist === false) return false
 
-      if (queryIsReadyForPersistance) {
-        return !((query.state?.data as any)?.pages?.length > 1)
+      if (queryIsReadyForPersistence) {
+        return (
+          !((query.state?.data as any)?.pages?.length > 1) ||
+          (!!query.state.data && !(query.state.data as any).pages)
+        )
       } else {
         return false
       }
     },
   },
-} as Omit<PersistQueryClientOptions, 'queryClient'>
+}
 export const ReactQueryProvider = ({ children }: PropsWithChildren) => {
   return (
     <PersistQueryClientProvider
@@ -59,5 +67,32 @@ export const ReactQueryProvider = ({ children }: PropsWithChildren) => {
     >
       {children}
     </PersistQueryClientProvider>
+  )
+}
+
+export const getQueryClientForDashboard = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: true,
+        refetchIntervalInBackground: false,
+        refetchOnMount: true,
+        retry(failureCount, error) {
+          if (error instanceof RequestError) {
+            if (error.status === 401) return false
+          }
+          return failureCount < 3
+        },
+      },
+    },
+  })
+
+export const ReactQueryProviderForDashboard = ({
+  children,
+}: PropsWithChildren) => {
+  return (
+    <QueryClientProvider client={useState(getQueryClientForDashboard)[0]}>
+      {children}
+    </QueryClientProvider>
   )
 }

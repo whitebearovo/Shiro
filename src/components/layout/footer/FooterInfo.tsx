@@ -1,45 +1,46 @@
 import Link from 'next/link'
 import type { FooterConfig } from './config'
 
-import { SubscribeTextButton } from '~/components/widgets/subscribe/SubscribeTextButton'
+import { fetchAggregationData } from '~/app/(app)/api'
+import { IonIosArrowDown } from '~/components/icons/arrow'
+import { SubscribeTextButton } from '~/components/modules/subscribe/SubscribeTextButton'
+import { FloatPopover } from '~/components/ui/float-popover'
+import { MLink } from '~/components/ui/link'
 import { clsxm } from '~/lib/helper'
 import { getQueryClient } from '~/lib/query-client.server'
 import { queries } from '~/queries/definition'
 
 import { defaultLinkSections } from './config'
 // import { footerConfig } from './config'
-import { GatewayCount } from './GatewayCount'
+import { GatewayInfo } from './GatewayInfo'
 import { OwnerName } from './OwnerName'
-import { VercelPoweredBy } from './VercelPoweredBy'
 
-const isVercelEnv = !!process.env.NEXT_PUBLIC_VERCEL_ENV
+// const isVercelEnv = !!process.env.NEXT_PUBLIC_VERCEL_ENV
 export const FooterInfo = () => {
   return (
     <>
       <div className="relative">
         <FooterLinkSection />
-        {isVercelEnv && (
+        {/* {isVercelEnv && (
           <div className="absolute top-0 hidden lg:-right-8 lg:block">
             <VercelPoweredBy />
           </div>
-        )}
+        )} */}
       </div>
 
       <FooterBottom />
 
-      {isVercelEnv && (
+      {/* {isVercelEnv && (
         <div className="mt-6 flex justify-center lg:hidden">
           <VercelPoweredBy />
         </div>
-      )}
+      )} */}
     </>
   )
 }
 
 const FooterLinkSection = async () => {
-  const queryClient = getQueryClient()
-  const data = await queryClient.fetchQuery(queries.aggregation.root())
-  const { footer } = data.theme
+  const { footer } = (await fetchAggregationData()).theme
   const footerConfig: FooterConfig = footer || {
     linkSections: defaultLinkSections,
   }
@@ -48,8 +49,15 @@ const FooterLinkSection = async () => {
     <div className="space-x-0 space-y-3 md:space-x-6 md:space-y-0">
       {footerConfig.linkSections.map((section) => {
         return (
-          <div className="block space-x-4 md:inline-flex" key={section.name}>
-            <b className="font-medium">{section.name}</b>
+          <div
+            className="flex items-center gap-4 md:inline-flex"
+            key={section.name}
+          >
+            <b className="inline-flex items-center font-medium">
+              {section.name}
+              <IonIosArrowDown className="ml-2 inline -rotate-90 select-none" />
+            </b>
+
             <span className="space-x-4 text-neutral-content/90">
               {section.links.map((link) => {
                 return (
@@ -106,10 +114,32 @@ const PoweredBy: Component = ({ className }) => {
       <StyledLink href="https://github.com/mx-space" target="_blank">
         Mix Space
       </StyledLink>
-      . <Divider />
-      <StyledLink href="https://github.com/innei/Shiro" target="_blank">
-        Shiro
-      </StyledLink>
+      <span className="mx-1">&</span>
+      <FloatPopover
+        isDisabled={!process.env.COMMIT_HASH}
+        mobileAsSheet
+        type="tooltip"
+        triggerElement={
+          <StyledLink href="https://github.com/innei/Shiro" target="_blank">
+            Shiro
+          </StyledLink>
+        }
+      >
+        这是{' '}
+        <StyledLink
+          className="underline"
+          href="https://github.com/innei/Shiro"
+          target="_blank"
+        >
+          Shiro
+        </StyledLink>{' '}
+        的开源版本。
+        {process.env.COMMIT_HASH && process.env.COMMIT_URL && (
+          <MLink popper={false} href={process.env.COMMIT_URL}>
+            版本哈希：{process.env.COMMIT_HASH.slice(0, 8)}
+          </MLink>
+        )}
+      </FloatPopover>
       .
     </span>
   )
@@ -163,17 +193,17 @@ const FooterBottom = async () => {
           <a href="/sitemap.xml" target="_blank">
             站点地图
           </a>
-          <Divider className="hidden md:inline" />
+          <Divider className="inline" />
 
           <SubscribeTextButton>
-            <Divider className="inline" />
+            <Divider className="hidden md:inline" />
           </SubscribeTextButton>
         </span>
         <span className="mt-3 block md:mt-0 md:inline">
           Stay hungry. Stay foolish.
         </span>
       </p>
-      <p>
+      <div>
         <PoweredBy className="my-3 block md:my-0 md:inline" />
         {icp && (
           <>
@@ -184,8 +214,12 @@ const FooterBottom = async () => {
           </>
         )}
 
-        <Divider className="hidden md:inline" />
-        <GatewayCount />
+        {icp ? (
+          <Divider className="inline" />
+        ) : (
+          <Divider className="hidden md:inline" />
+        )}
+        <GatewayInfo />
         {/* {!!lastVisitor && (
           <>
             <Divider />
@@ -198,7 +232,7 @@ const FooterBottom = async () => {
             </span>
           </>
         )} */}
-      </p>
+      </div>
     </div>
   )
 }

@@ -6,9 +6,9 @@ import { typescriptHappyForwardRef } from 'foxact/typescript-happy-forward-ref'
 import { AnimatePresence, m } from 'framer-motion'
 import { atom, useAtomValue } from 'jotai'
 import type { HTMLMotionProps } from 'framer-motion'
-import type { PropsWithChildren } from 'react'
+import type { PropsWithChildren, ReactNode } from 'react'
 
-import { useIsMobile } from '~/atoms'
+import { useIsMobile } from '~/atoms/hooks'
 import { clsxm } from '~/lib/helper'
 import { jotaiStore } from '~/lib/store'
 import { usePageScrollDirectionSelector } from '~/providers/root/page-scroll-info-provider'
@@ -48,10 +48,10 @@ export const FABBase = typescriptHappyForwardRef(
             exit={{ opacity: 0.3, scale: 0.8 }}
             className={clsxm(
               'mt-2 flex items-center justify-center',
-              'h-12 w-12 text-lg md:h-10 md:w-10 md:text-base',
-              'border border-accent outline-accent hover:opacity-100 focus:opacity-100 focus:outline-none',
-              'rounded-xl border border-zinc-400/20 shadow-lg backdrop-blur-lg dark:border-zinc-500/30 dark:bg-zinc-800/80 dark:text-zinc-200',
-              'bg-slate-50/80 shadow-lg dark:bg-neutral-900/80',
+              'size-12 text-lg md:size-10 md:text-base',
+              'outline-accent hover:opacity-100 focus:opacity-100 focus:outline-none',
+              'rounded-xl border border-zinc-400/20 backdrop-blur-lg dark:border-zinc-500/30 dark:text-zinc-200',
+              'bg-zinc-50/80 shadow-lg dark:bg-neutral-900/80',
               'transition-all duration-500 ease-in-out',
 
               className,
@@ -72,18 +72,21 @@ export const FABPortable = typescriptHappyForwardRef(
       children: React.JSX.Element
 
       onClick: () => void
+      onlyShowInMobile?: boolean
+      show?: boolean
     },
     ref: React.ForwardedRef<HTMLButtonElement>,
   ) => {
-    const { onClick, children } = props
+    const { onClick, children, show = true } = props
     const id = useId()
     const portalElement = useAtomValue(fabContainerElementAtom)
-
+    const isMobile = useIsMobile()
+    if (props.onlyShowInMobile && !isMobile) return null
     if (!portalElement) return null
 
     return (
       <RootPortal to={portalElement}>
-        <FABBase ref={ref} id={id} onClick={onClick}>
+        <FABBase ref={ref} id={id} show={show} onClick={onClick}>
           {children}
         </FABBase>
       </RootPortal>
@@ -91,9 +94,7 @@ export const FABPortable = typescriptHappyForwardRef(
   },
 )
 
-export const FABContainer = (props: {
-  children: JSX.Element | JSX.Element[]
-}) => {
+export const FABContainer = (props: { children?: ReactNode }) => {
   const isMobile = useIsMobile()
 
   const shouldHide = usePageScrollDirectionSelector(
@@ -113,8 +114,9 @@ export const FABContainer = (props: {
     <div
       ref={fabContainerRef}
       data-testid="fab-container"
+      data-hide-print
       className={clsx(
-        'font-lg fixed bottom-[calc(2rem+env(safe-area-inset-bottom))] right-4 z-[9] flex flex-col',
+        'font-lg fixed bottom-[calc(2rem+env(safe-area-inset-bottom))] left-[calc(100vw-3rem-1rem)] z-[9] flex flex-col',
         shouldHide ? 'translate-x-[calc(100%+2rem)]' : '',
         'transition-transform duration-300 ease-in-out',
       )}

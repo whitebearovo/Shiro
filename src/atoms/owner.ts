@@ -1,4 +1,4 @@
-import { atom, useAtomValue } from 'jotai'
+import { atom } from 'jotai'
 
 import { getToken, removeToken, setToken } from '~/lib/cookie'
 import { apiClient } from '~/lib/request'
@@ -6,12 +6,13 @@ import { jotaiStore } from '~/lib/store'
 import { toast } from '~/lib/toast'
 import { aggregationDataAtom } from '~/providers/root/aggregation-data-provider'
 
+import { refreshToken } from './hooks/owner'
 import { fetchAppUrl } from './url'
 
-const ownerAtom = atom((get) => {
+export const ownerAtom = atom((get) => {
   return get(aggregationDataAtom)?.user
 })
-const isLoggedAtom = atom(false)
+export const isLoggedAtom = atom(false)
 
 export const login = async (username?: string, password?: string) => {
   if (username && password) {
@@ -36,32 +37,27 @@ export const login = async (username?: string, password?: string) => {
   if (!token) {
     return
   }
-  const outdateToast = () => toast.warn('登录身份过期了，再登录一下吧！')
+  // const outdateToast = () => toast.warn('登录身份过期了，再登录一下吧！')
   const validated = await apiClient.user
     .checkTokenValid(token)
     .then((res) => !!res.ok)
 
     .catch(() => {
       removeToken()
-      outdateToast()
+      // outdateToast()
       return false
     })
 
   if (!validated) {
-    outdateToast()
+    // outdateToast()
     removeToken()
     return
   }
 
-  await apiClient.user.proxy.login.put<{ token: string }>().then((res) => {
-    jotaiStore.set(isLoggedAtom, true)
-    toast(`欢迎回来，${jotaiStore.get(ownerAtom)?.name}`, 'success')
-    setToken(res.token)
-  })
+  await refreshToken()
+  toast(`欢迎回来，${jotaiStore.get(ownerAtom)?.name}`, 'success')
 
   return true
 }
-
-export const useIsLogged = () => useAtomValue(isLoggedAtom)
 
 export const isLogged = () => jotaiStore.get(isLoggedAtom)

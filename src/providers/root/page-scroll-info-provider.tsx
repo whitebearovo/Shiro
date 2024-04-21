@@ -1,13 +1,13 @@
 'use client'
 
-import { startTransition, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useIsomorphicLayoutEffect } from 'foxact/use-isomorphic-layout-effect'
 import { atom, useAtomValue, useSetAtom } from 'jotai'
 import type { FC, PropsWithChildren } from 'react'
 
 import { setIsInteractive } from '~/atoms/is-interactive'
-import { throttle } from '~/lib/_'
 import { createAtomSelector } from '~/lib/atom'
+import { throttle } from '~/lib/lodash'
 
 const pageScrollLocationAtom = atom(0)
 const pageScrollDirectionAtom = atom<'up' | 'down' | null>(null)
@@ -27,9 +27,6 @@ const ScrollDetector = () => {
   const prevScrollY = useRef(0)
   const setIsInteractiveOnceRef = useRef(false)
 
-  // const lastTime = useRef(0)
-  // const setScrollSpeed = useSetAtom(pageScrollSpeedAtom)
-
   useIsomorphicLayoutEffect(() => {
     const scrollHandler = throttle(
       () => {
@@ -37,15 +34,23 @@ const ScrollDetector = () => {
           setIsInteractive(true)
           setIsInteractiveOnceRef.current = true
         }
-        const currentTop = document.documentElement.scrollTop
+        let currentTop = document.documentElement.scrollTop
 
+        // 当 radix modal 被唤出，body 会被设置为 fixed，此时需要获取 body 的 top 值。
+        // 只有在 mobile 端会出现这种逻辑
+        if (currentTop === 0) {
+          const bodyStyle = document.body.style
+          if (bodyStyle.position === 'fixed') {
+            const bodyTop = bodyStyle.top
+            currentTop = Math.abs(parseInt(bodyTop, 10))
+          }
+        }
         setPageScrollDirection(
           prevScrollY.current - currentTop > 0 ? 'up' : 'down',
         )
         prevScrollY.current = currentTop
-        startTransition(() => {
-          setPageScrollLocation(prevScrollY.current)
-        })
+
+        setPageScrollLocation(prevScrollY.current)
       },
       16,
       {
