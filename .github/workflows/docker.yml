@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -29,3 +33,28 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/whitebearovo/shiro:latest
+
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: refs/heads/main
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Merge upstream
+        run: |
+          git remote add upstream https://github.com/Innei/Shiro.git
+          git fetch upstream
+          git merge upstream/main --no-edit
+
+      - name: Push changes
+        run: |
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
