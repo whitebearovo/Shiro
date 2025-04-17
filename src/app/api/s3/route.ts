@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'

@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { PageActionAside } from '~/components/modules/page/PageActionAside'
 import { ArticleRightAside } from '~/components/modules/shared/ArticleRightAside'
 import { ReadIndicatorForMobile } from '~/components/modules/shared/ReadIndicator'

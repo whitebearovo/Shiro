@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import type { AggregateRoot } from '@mx-space/api-client'
 import {
   AggregateController,
@@ -23,7 +25,6 @@ const apiClient = createClient(fetchAdaptor)(API_URL, {
   ],
 })
 
-export const runtime = 'edge'
 
 export const revalidate = 86400 // 24 hours
 

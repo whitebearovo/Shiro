@@ -1,4 +1,6 @@
 'use client'
+export const runtime = 'edge';
+
 
 import type { RecentlyModel } from '@mx-space/api-client'
 import {

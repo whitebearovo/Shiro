@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { getQueryClient } from '~/lib/query-client.server'
 import { apiClient } from '~/lib/request'
 

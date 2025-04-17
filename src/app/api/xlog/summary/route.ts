@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import type { NextRequest } from 'next/server'
 
 import { NextServerResponse } from '~/lib/edge-function.server'
@@ -8,7 +10,6 @@ const headers = {
   'User-Agent': `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Shiro`,
 }
 
-export const runtime = 'edge'
 
 export const revalidate = 3600 // 1 hour
 

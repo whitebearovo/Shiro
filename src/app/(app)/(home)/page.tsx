@@ -1,4 +1,6 @@
 'use client'
+export const runtime = 'edge';
+
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'

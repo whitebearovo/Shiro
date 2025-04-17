@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import type { Image } from '@mx-space/api-client'
 import type { MarkdownToJSX } from 'markdown-to-jsx'
 import { compiler } from 'markdown-to-jsx'
