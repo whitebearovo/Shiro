@@ -10,7 +10,7 @@
   "scripts": {
     "analyze": "cross-env NODE_ENV=production ANALYZE=true BUNDLE_ANALYZE=browser next build",
     "prebuild": "rimraf .next || exit 0",
-    "build": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 next build",
+    "build": "cross-env NODE_ENV=production next build && npx @cloudflare/next-on-pages@latest",
     "build:ci": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 NEXT_TELEMETRY_DISABLED=1 CI=true next build",
     "dev": "cross-env NODE_ENV=development next dev -p 2323",
     "dev:turbo": "cross-env NODE_ENV=development next dev -p 2323 --turbo",
@@ -109,7 +109,6 @@
     "xss": "1.0.15"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.12",
     "@egoist/tailwindcss-icons": "1.9.0",
     "@iconify-json/material-symbols": "1.2.17",
     "@iconify-json/mingcute": "1.2.3",
@@ -155,7 +154,6 @@
     "tailwindcss-animated": "2.0.0",
     "tailwindcss-motion": "1.1.0",
     "typescript": "5.8.3",
-    "wrangler": "^4.12.0",
     "zx": "8.5.0"
   },
   "pnpm": {
