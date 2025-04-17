@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+
 import Link from 'next/link'
 
 import { TimelineList } from '~/components/ui/list/TimelineList'

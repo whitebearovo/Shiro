@@ -1,6 +1,7 @@
+'use client'
 export const runtime = 'edge';
 
-'use client'
+
 
 import type { TimelineData } from '@mx-space/api-client'
 import { TimelineType } from '@mx-space/api-client'

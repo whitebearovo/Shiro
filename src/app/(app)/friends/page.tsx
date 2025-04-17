@@ -1,6 +1,7 @@
+'use client'
 export const runtime = 'edge';
 
-'use client'
+
 
 import type { LinkModel } from '@mx-space/api-client'
 import { LinkState, LinkType, RequestError } from '@mx-space/api-client'

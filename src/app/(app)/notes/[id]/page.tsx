@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+
 import type { NoteModel } from '@mx-space/api-client'
 import type { Metadata } from 'next'
 

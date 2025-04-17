@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+
 import { sql } from '@vercel/postgres'
 import type { NextRequest } from 'next/server'
 import OpenAI from 'openai'

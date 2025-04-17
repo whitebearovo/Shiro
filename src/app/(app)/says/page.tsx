@@ -1,6 +1,7 @@
+'use client'
 export const runtime = 'edge';
 
-'use client'
+
 
 import { useSayListQuery } from '~/components/modules/say/hooks'
 import { SayMasonry } from '~/components/modules/say/SayMasonry'

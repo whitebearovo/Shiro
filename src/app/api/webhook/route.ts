@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+
 import type { RequestWithJSONBody } from '@mx-space/webhook'
 import {
   BusinessEvents,

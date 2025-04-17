@@ -1,6 +1,7 @@
+'use client'
 export const runtime = 'edge';
 
-'use client'
+
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'

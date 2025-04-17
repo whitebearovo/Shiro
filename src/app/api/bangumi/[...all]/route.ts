@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 // reverse proxy to bangumi api
 //
 
@@ -7,7 +9,6 @@ import { NextResponse } from 'next/server'
 import { allowedBangumiTypes, typeMap } from '~/lib/bangumi'
 import { NextServerResponse } from '~/lib/edge-function.server'
 
-export const runtime = 'edge'
 export const revalidate = 86400 // 24 hours
 export const GET = async (req: NextRequest) => {
   const pathname = req.nextUrl.pathname.split('/').slice(3)
