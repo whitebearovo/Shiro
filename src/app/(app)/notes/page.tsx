@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import type { NoteWrappedWithLikedPayload } from '@mx-space/api-client'
 import { cookies } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'

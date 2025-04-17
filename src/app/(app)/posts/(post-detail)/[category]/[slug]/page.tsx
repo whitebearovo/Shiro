@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import type { ModelWithLiked, PostModel } from '@mx-space/api-client'
 import type { Metadata } from 'next'
 
