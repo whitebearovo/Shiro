@@ -1,0 +1,5 @@
+name = "shiro"
+compatibility_date = "2025-04-17"
+
+# 指向 @cloudflare/next-on-pages 生成的 Worker 入口
+main = "./worker.js"
