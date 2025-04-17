@@ -6,8 +6,6 @@ import NextBundleAnalyzer from '@next/bundle-analyzer'
 import { codeInspectorPlugin } from 'code-inspector-plugin'
 import { config } from 'dotenv'
 
- 
-
 process.title = 'Shiro (NextJS)'
 
 const env = config().parsed || {}
@@ -26,16 +24,13 @@ if (repoInfo) {
 }
 
 /** @type {import('next').NextConfig} */
- 
 let nextConfig = {
   // logging: {
   //   fetches: {
-
   //     // fullUrl: true,
   //   },
   // },
   env: {
-     
     COMMIT_HASH: commitHash,
     COMMIT_URL: commitUrl,
   },
@@ -79,6 +74,15 @@ let nextConfig = {
       __dirname,
       'node_modules/jotai',
     )
+
+    // Node.js polyfill for browser
+    if (!config.resolve.fallback) config.resolve.fallback = {}
+    Object.assign(config.resolve.fallback, {
+      path: require.resolve('path-browserify'),
+      stream: require.resolve('stream-browserify'),
+      zlib: require.resolve('browserify-zlib'),
+      fs: false, // 禁止 fs，浏览器端无法用
+    })
 
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',
