@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
 
 import NextBundleAnalyzer from '@next/bundle-analyzer'
 import { codeInspectorPlugin } from 'code-inspector-plugin'
@@ -8,6 +9,7 @@ import { config } from 'dotenv'
 
 process.title = 'Shiro (NextJS)'
 
+const require = createRequire(import.meta.url)
 const env = config().parsed || {}
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -81,7 +83,7 @@ let nextConfig = {
       path: require.resolve('path-browserify'),
       stream: require.resolve('stream-browserify'),
       zlib: require.resolve('browserify-zlib'),
-      fs: false, // 禁止 fs，浏览器端无法用
+      fs: false,
     })
 
     config.externals.push({
